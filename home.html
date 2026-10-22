@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<!-- ==========================================================================
+     HYDRO BIOGEO LAB — LANDING PAGE (home.html)
+     ==========================================================================
+     This page is made of three files that work together:
+       home.html  the CONTENT and STRUCTURE (this file)
+       home.css   the LOOK: colours, sizes, layout
+       home.js    the BEHAVIOUR: the animated landscape, drawn with D3
+
+     Reading tips:
+       - <!-- ... --> is an HTML comment: the browser ignores it.
+       - class="..." gives an element a name that CSS and JavaScript use to find it
+         (several elements can share a class). id="..." is a unique name.
+     ========================================================================== -->
+
+<!-- lang="en" tells browsers and screen readers the page is in English -->
+<html lang="en">
+
+<!-- ======================================================================
+     <head>: information ABOUT the page (not displayed in the page itself)
+     ====================================================================== -->
+<head>
+  <meta charset="UTF-8">   <!-- text encoding: lets us write é, ü, →, © directly -->
+  <!-- Makes the page fit phone screens instead of showing a zoomed-out desktop page -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Short description, shown by search engines -->
+  <meta name="description" content="Hydro Biogeo Lab – Université de Montréal">
+  <title>Hydro Biogeo Lab – Université de Montréal</title>   <!-- text on the browser tab -->
+  <!-- Small icon on the browser tab ("favicon") -->
+  <link rel="icon" href="https://hydro-biogeo-lab.umontreal.ca/images/HydrobioGeo_Logo_flavicon.png">
+
+  <!-- The font, loaded from Google Fonts (same font as the lab's Quarto site).
+       "preconnect" starts connecting to the font server early, to load faster. -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+
+  <!-- Our own styles -->
+  <link rel="stylesheet" href="home.css">
+</head>
+
+<!-- ======================================================================
+     <body>: everything that is displayed
+     ====================================================================== -->
+<body>
+
+  <!-- ===== NAVIGATION BAR (dark blue, fixed at the top) ===== -->
+  <header class="site-header">
+    <!-- href="#top" jumps back to the element with id="top" (the intro) -->
+    <a class="brand" href="#top">
+      <!-- alt="" because the name is written right next to it (avoids repeating it for screen readers) -->
+      <img src="https://hydro-biogeo-lab.umontreal.ca/images/HydrobioGeo_Logo_flavicon.png" alt="">
+      <span>Hydro Biogeo Lab</span>
+    </a>
+    <!-- <nav> marks a block of navigation links; aria-label names it for screen readers -->
+    <nav class="main-nav" aria-label="Main">
+      <ul>   <!-- a list of links: <ul> = list, <li> = list item, <a> = link -->
+        <li><a href="https://hydro-biogeo-lab.umontreal.ca/research/research.html">Research</a></li>
+        <li><a href="https://hydro-biogeo-lab.umontreal.ca/team/members/members.html">Team</a></li>
+        <li><a href="https://hydro-biogeo-lab.umontreal.ca/publications/publications.html">Publications</a></li>
+        <li><a href="https://hydro-biogeo-lab.umontreal.ca/ressources/ressources.html">Educational Resources</a></li>
+        <li><a class="lang" href="https://hydro-biogeo-lab.umontreal.ca/fr/index.html" lang="fr">FR</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- ===== ANIMATED INTRO: side view → top-down view =====
+       How it works (see also home.css section 4):
+         .intro   a very tall section, so there is a lot to scroll;
+         .stage   stays stuck on the screen while .intro scrolls past;
+         home.js  reads the scroll position and rotates the camera.
+       aria-label names this region for screen readers. -->
+  <section class="intro" id="top" aria-label="Introduction">
+    <div class="stage">
+
+      <!-- The drawing surface. home.js paints the landscape, contour lines and
+           moving dots here, 60 times per second.
+           aria-hidden="true": purely decorative, screen readers skip it. -->
+      <canvas id="terrain" aria-hidden="true"></canvas>
+
+      <!-- Step 1 (top of the page): title above the tilted landscape.
+           home.js fades it out as you start scrolling. -->
+      <div class="overlay overlay-title">
+        <h1>Hydro Biogeo Lab</h1>   <!-- <h1> = the page's main title (only one per page) -->
+        <!-- The lime line above this text is drawn by CSS (.affil::before), not in the HTML -->
+        <p class="affil">Université de Montréal</p>
+      </div>
+
+      <!-- Step 2 (after scrolling): title and logo over the top-down map.
+           Hidden at first; home.js fades it in. -->
+      <div class="overlay overlay-welcome">
+        <h2>Welcome to the lab</h2>
+        <!-- width/height tell the browser the image's proportions before it loads,
+             so the page doesn't jump when it appears. The real display size is set in CSS. -->
+        <img class="welcome-logo" src="HydrobioGeo_Logo_web.webp" alt="Hydro Biogeo Lab logo" width="576" height="640">
+      </div>
+
+      <!-- "Scroll ↓" hint. The <span> lets CSS animate only the arrow. -->
+      <p class="scroll-cue" aria-hidden="true">Scroll <span>↓</span></p>
+    </div>
+  </section>
+
+  <!-- ===== MAIN CONTENT =====
+       <main> marks the page's main content (helps screen readers jump to it). -->
+  <main>
+
+    <!-- ===== Who we are =====
+         id="who-we-are" lets a link point here with href="#who-we-are". -->
+    <section id="who-we-are" class="section">
+      <h2>Who we are</h2>
+      <p>The Hydro Biogeo Lab is an interdisciplinary research group specializing in watershed hydrology and biogeochemistry. We want to better understand how land-water processes drive biogeochemical fluxes, their inner-workings and how they may respond to environmental changes.</p>
+      <!-- <em> = emphasis, shown in italics -->
+      <p>Our research is based mostly on field observations and carried across multiple scales, from a single stream to the global scale. We combine multiple tools including automated and continuous <em>in-situ</em> sensor measurements, isotopic tracers and geospatial data analysis.</p>
+      <p>We are based at the <a href="https://geographie.umontreal.ca/accueil/">Department of Geography of Université de Montréal</a>, located at Campus MIL.</p>
+    </section>
+
+    <!-- Wide contour-map image. <figure> groups an image (and optionally a caption).
+         alt="..." describes the image for people who can't see it. -->
+    <figure class="wide-figure">
+      <img src="https://hydro-biogeo-lab.umontreal.ca/images/Home_header.png" alt="Contour map of a landscape with a river">
+    </figure>
+
+    <!-- ===== How to use this website ===== -->
+    <section id="how-to" class="section">
+      <h2>How to use this website</h2>
+      <!-- <strong> = important text, shown in bold -->
+      <p>This website serves as a <strong>diffusion platform</strong> for the research we do collectively in the lab. Here, you will find:</p>
+
+      <!-- Three clickable cards. Each card is ONE link (<a>), so the whole card is
+           clickable. CSS (.card-grid) arranges them in 3 columns, or 1 on phones. -->
+      <div class="card-grid">
+        <a class="card" href="https://hydro-biogeo-lab.umontreal.ca/ressources/ressources.html">
+          <span class="card-kicker">Educational resources</span>   <!-- small label -->
+          <span>Tutorials and data viz material.</span>             <!-- description -->
+          <span class="card-arrow">→</span>                         <!-- round lime arrow -->
+        </a>
+        <a class="card" href="https://hydro-biogeo-lab.umontreal.ca/team/members/members.html">
+          <span class="card-kicker">Team</span>
+          <span>Individual portfolios from team members with more information on their research projects.</span>
+          <span class="card-arrow">→</span>
+        </a>
+        <a class="card" href="https://hydro-biogeo-lab.umontreal.ca/publications/publications.html">
+          <span class="card-kicker">Publications</span>
+          <span>A list of publications, field sites, tools and equipment that form the core basis of our work.</span>
+          <span class="card-arrow">→</span>
+        </a>
+      </div>
+
+      <p class="note">We hold strong beliefs in the importance of making our science and knowledge accessible.</p>
+      <!-- Licence statement. rel="license" marks the link as the page's licence, a
+           standard that search engines and Creative Commons tools recognise.
+           &nbsp; = a "non-breaking space": keeps "CC BY 4.0" together on one line. -->
+      <p class="license">Unless otherwise noted, the content of this website (text, tutorials, figures and data visualizations) is licensed under a <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License (CC&nbsp;BY&nbsp;4.0)</a>, and its code under the <a href="https://github.com/audreycampeau/hydro-biogeo-lab/blob/main/LICENSE">MIT License</a>. You are welcome to reuse and adapt this material, as long as you credit the Hydro Biogeo Lab. Logos and third-party images belong to their respective owners.</p>
+    </section>
+
+    <!-- ===== Partners ===== -->
+    <section id="partners" class="section">
+      <h2>Partners</h2>
+      <p>Our research is supported by</p>
+      <img class="partners" src="https://hydro-biogeo-lab.umontreal.ca/images/partners.png" alt="Logos of the lab's partners and funding agencies">
+    </section>
+
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <p>© 2026 Hydro Biogeo Lab, Université de Montréal. Content licensed under <a href="https://creativecommons.org/licenses/by/4.0/" rel="license">CC&nbsp;BY&nbsp;4.0</a>; code under the <a href="https://github.com/audreycampeau/hydro-biogeo-lab/blob/main/LICENSE">MIT License</a>.</p>
+    <a href="https://www.umontreal.ca/">
+      <img src="https://hydro-biogeo-lab.umontreal.ca/images/Universite_de_Montreal_logo.svg.webp" alt="Université de Montréal">
+    </a>
+  </footer>
+
+  <!-- ===== SCRIPTS =====
+       Scripts are placed at the END of <body>, so the HTML above already exists
+       when they run (home.js needs to find the canvas and the texts).
+       ORDER MATTERS: D3 must load first, because home.js uses it. -->
+
+  <!-- 1. The D3 library, version 7.9.0, from a CDN (a public server hosting libraries).
+          After this line, the global variable "d3" exists. -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+  <!-- 2. Our animation code -->
+  <script src="home.js"></script>
+</body>
+</html>
