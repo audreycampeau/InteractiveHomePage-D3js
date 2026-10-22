@@ -1,0 +1,408 @@
+/* ==========================================================================
+   HYDRO BIOGEO LAB — LANDING PAGE STYLES (home.css)
+   ==========================================================================
+
+   HOW CSS WORKS (quick reminder)
+   ------------------------------
+   A CSS rule = a SELECTOR (which elements) + DECLARATIONS (what they look like):
+
+       .card { background: #fff; }
+       ^^^^^   ^^^^^^^^^^  ^^^^
+       selector  property  value
+
+   Selectors used in this file:
+       body, h1, a       an HTML tag
+       .card             elements with class="card"
+       #terrain          the element with id="terrain"
+       .main-nav a       <a> elements INSIDE an element with class="main-nav"
+       a:hover           <a> elements while the mouse is over them
+       .affil::before    an extra, invisible-in-HTML element CSS creates
+                         before the content of .affil (used for decorations)
+
+   Sections of this file:
+     1. Variables (colours, fonts, sizes)
+     2. Base styles
+     3. Navigation bar
+     4. Animated intro (works together with home.js)
+     5. Content sections
+     6. Footer
+     7. Responsive and accessibility rules
+   ========================================================================== */
+
+
+/* --------------------------------------------------------------------------
+   1. VARIABLES ("custom properties")
+   --------------------------------------------------------------------------
+   :root = the whole page. A variable is declared with -- and used with var():
+       --ink: #1a4d6e;      →      color: var(--ink);
+   Change a colour here and it changes everywhere it is used.
+   -------------------------------------------------------------------------- */
+:root {
+  --ink: #1a4d6e;          /* main dark blue: same as the Quarto site's text and navbar */
+  --ink-soft: #4d6f86;     /* softer blue for secondary text */
+  --line: #7d99ab;         /* grey-blue of the contour lines in the home page map */
+  --lime: #c1ff28;         /* lime accent, taken from the dot in the home page map */
+  --bg: #eef6fb;           /* page background ("soft water mist" in the Quarto theme) */
+  --nav-bg: #1a4d6e;       /* navigation bar background (same as the Quarto site) */
+  --nav-fg: #f5f5f0;       /* navigation bar text */
+  --footer-bg: #ecf0f1;    /* footer background (same as the Quarto site) */
+  --footer-fg: #6a6c6c;    /* footer text */
+  --border: #d6e3ec;       /* thin borders around cards and images */
+
+  /* Font: the first available one in the list is used */
+  --font: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --max-width: 1040px;     /* maximum width of the text column */
+  --radius: 16px;          /* rounded corners */
+  --header-h: 68px;        /* height of the navigation bar */
+}
+
+
+/* --------------------------------------------------------------------------
+   2. BASE STYLES — apply to the whole page
+   -------------------------------------------------------------------------- */
+
+/* "*" = every element. border-box means width INCLUDES padding and border,
+   which makes sizes much easier to reason about. */
+* { box-sizing: border-box; }
+
+/* When a link jumps to a section (#who-we-are), leave room for the fixed navbar. */
+html { scroll-padding-top: var(--header-h); }
+
+body {
+  margin: 0;                 /* browsers add a default margin; remove it */
+  font-family: var(--font);
+  font-size: 1.08rem;        /* rem = relative to the browser's default size (usually 16px) */
+  line-height: 1.75;         /* space between lines, as a multiple of the font size */
+  color: var(--ink);
+  background: var(--bg);
+}
+
+/* Images never overflow their container, and keep their proportions. */
+img { max-width: 100%; height: auto; display: block; }
+
+a { color: #2c7da0; text-decoration: none; }   /* links: blue, not underlined... */
+a:hover { text-decoration: underline; }         /* ...until the mouse is over them */
+h1, h2, h3 { line-height: 1.12; color: var(--ink); font-weight: 700; }
+
+
+/* --------------------------------------------------------------------------
+   3. NAVIGATION BAR
+   -------------------------------------------------------------------------- */
+.site-header {
+  position: fixed;           /* stays at the top of the window while scrolling */
+  inset: 0 0 auto 0;         /* shorthand for top: 0; right: 0; bottom: auto; left: 0 */
+  z-index: 20;               /* stacking order: higher = on top of other elements */
+  height: var(--header-h);
+
+  /* FLEXBOX: lays out the children (logo + menu) in a row. */
+  display: flex;
+  align-items: center;             /* centre them vertically */
+  justify-content: space-between;  /* logo on the left, menu on the right */
+  gap: 1rem;
+
+  /* clamp(min, preferred, max): a size that grows with the window (3vw = 3% of
+     the window width) but never goes below 16px or above 2rem. */
+  padding: 0 clamp(16px, 3vw, 2rem);
+  background: var(--nav-bg);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);   /* soft shadow: x, y, blur, colour */
+}
+
+/* Logo + lab name, on the left */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--nav-fg);
+  font-size: 1.25rem;
+  white-space: nowrap;       /* never wrap onto two lines */
+}
+.brand:hover { text-decoration: none; }
+.brand img { width: 34px; height: 34px; }
+
+/* Menu links, on the right */
+.main-nav ul {
+  list-style: none;          /* no bullet points */
+  display: flex;             /* items side by side */
+  gap: clamp(0.9rem, 2vw, 1.75rem);
+  margin: 0;
+  padding: 0;
+}
+.main-nav a { color: var(--nav-fg); font-size: 1rem; }
+/* On hover: a lime bar under the link. An "inset" box-shadow draws
+   inside the element; here 3px tall at the bottom. */
+.main-nav a:hover { color: #d7e6ed; text-decoration: none; box-shadow: inset 0 -3px 0 var(--lime); }
+/* The "FR" language button: small outlined box */
+.main-nav .lang {
+  border: 1px solid var(--nav-fg);
+  border-radius: 6px;
+  padding: 0.1rem 0.45rem;
+}
+
+
+/* --------------------------------------------------------------------------
+   4. ANIMATED INTRO (works together with home.js)
+   --------------------------------------------------------------------------
+   The trick behind "scroll-driven" animation:
+     - .intro is very TALL (320% of the window height), so there is a lot to scroll;
+     - .stage inside it is "sticky": it stays glued to the screen while
+       .intro scrolls past behind it;
+     - home.js measures how far you've scrolled through .intro (0 → 1)
+       and uses that number to rotate the camera and fade the texts.
+   When .intro has fully scrolled past, .stage leaves with it and the
+   normal content appears.
+   -------------------------------------------------------------------------- */
+.intro {
+  position: relative;
+  height: 320vh;             /* vh = % of the window height. Larger = slower animation */
+}
+.stage {
+  position: sticky;          /* behaves normally, then "sticks" once it reaches top: ... */
+  top: var(--header-h);      /* ...just below the navigation bar */
+  height: calc(100vh - var(--header-h));    /* window height minus the navbar */
+  height: calc(100svh - var(--header-h));   /* svh = "small viewport height": on phones it
+                                               ignores the address bar. Browsers that don't know
+                                               svh ignore this line and use the one above. */
+  overflow: hidden;          /* hide anything that sticks out */
+  background: var(--bg);
+}
+
+/* The canvas fills the whole stage. "position: absolute" + inset: 0 =
+   stretch to all four edges of the nearest positioned parent (.stage). */
+#terrain {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Shared style for the texts placed ON TOP of the canvas */
+.overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  padding: 0 16px;
+  text-align: center;
+  pointer-events: none;            /* mouse events pass through to the canvas (for the spotlight) */
+  will-change: opacity, transform; /* hint to the browser: these change often, prepare for it */
+}
+
+/* --- Step 1: title above the landscape --- */
+.overlay-title { top: 5vh; }
+.overlay-title h1 {
+  margin: 0;
+  font-size: clamp(2.6rem, 8vw, 6.2rem);   /* big on desktop, smaller on phones */
+  letter-spacing: -0.015em;                /* slightly tighter letters for a big title */
+  /* Several shadows in the background colour, with no offset = a soft
+     "halo" that keeps the text readable when contour lines pass behind it. */
+  text-shadow: 0 0 24px var(--bg), 0 0 10px var(--bg), 0 0 4px var(--bg);
+}
+.affil {
+  margin: 0.6rem 0 0;
+  font-size: clamp(0.95rem, 2vw, 1.35rem);
+  letter-spacing: 0.22em;          /* widely spaced capitals */
+  text-transform: uppercase;       /* displayed in capitals, typed normally in the HTML */
+  color: var(--ink-soft);
+  text-shadow: 0 0 12px var(--bg), 0 0 4px var(--bg);
+}
+/* The lime line between "Hydro Biogeo Lab" and "Université de Montréal".
+   ::before creates an empty element at the start of .affil; we turn it into
+   a coloured bar by giving it a size and a background. */
+.affil::before {
+  content: "";                     /* required, even if empty, for ::before to appear */
+  display: block;                  /* on its own line */
+  width: min(224px, 60vw);         /* 224px wide, but at most 60% of the screen on phones */
+  height: 5px;
+  margin: 0 auto 0.9rem;           /* auto left/right margins = centred */
+  border-radius: 3px;
+  background: var(--lime);
+}
+
+/* --- Step 2: "Welcome to the lab" + logo, over the top-down view --- */
+.overlay-welcome {
+  top: 50%;                        /* home.js adds translateY(-50%) to centre it exactly */
+  opacity: 0;                      /* hidden at first; home.js fades it in */
+}
+/* A soft pale glow behind the title and logo (no visible box), for readability.
+   A radial-gradient goes from the background colour in the centre to fully
+   transparent at the edge. z-index: -1 puts it behind the text. */
+.overlay-welcome::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(760px, 120vw);
+  height: min(760px, 120vw);
+  transform: translate(-50%, -50%);   /* centre the glow on its position */
+  z-index: -1;
+  background: radial-gradient(closest-side, var(--bg) 0%, rgba(238, 246, 251, 0.85) 45%, rgba(238, 246, 251, 0) 100%);
+}
+.overlay-welcome h2 {
+  margin: 0 0 1.25rem;
+  font-size: clamp(2.2rem, 6vw, 4.2rem);
+  text-shadow: 0 0 24px var(--bg), 0 0 10px var(--bg), 0 0 4px var(--bg);
+}
+.welcome-logo {
+  width: clamp(170px, 24vh, 260px);   /* scales with the window height */
+  height: auto;
+  margin: 0 auto;                     /* centred */
+}
+
+/* "SCROLL ↓" hint at the bottom of the first screen */
+.scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: 1.5rem;
+  margin: 0;
+  transform: translateX(-50%);        /* centre horizontally */
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+/* The arrow bobs up and down, using the CSS animation "bob" defined below. */
+.scroll-cue span { display: inline-block; animation: bob 2s ease-in-out infinite; }
+/* @keyframes describes an animation: at 50% of each 2 s cycle the arrow is
+   5px lower; at 0% and 100% it is in its normal place. */
+@keyframes bob { 50% { transform: translateY(5px); } }
+
+
+/* --------------------------------------------------------------------------
+   5. CONTENT SECTIONS
+   -------------------------------------------------------------------------- */
+
+/* Each section: a centred column with a maximum width. */
+.section {
+  max-width: var(--max-width);
+  margin: 0 auto;                           /* auto left/right = centred */
+  padding: 5rem clamp(16px, 4vw, 2rem);     /* top/bottom 5rem, sides responsive */
+}
+.section h2 {
+  font-size: clamp(1.9rem, 4vw, 2.6rem);
+  margin: 0 0 1.5rem;
+}
+/* Small lime bar under each section title (::after = after the title text). */
+.section h2::after {
+  content: "";
+  display: block;
+  width: 56px;
+  height: 5px;
+  margin-top: 0.7rem;
+  border-radius: 3px;
+  background: var(--lime);
+}
+
+/* The wide contour-map image */
+.wide-figure {
+  margin: 0;                 /* <figure> has default margins; remove them */
+  padding: 0 clamp(16px, 4vw, 2rem);
+}
+.wide-figure img {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+}
+
+/* The three link cards.
+   CSS GRID: "repeat(auto-fit, minmax(240px, 1fr))" = as many columns as fit,
+   each at least 240px wide, sharing the remaining space equally ("1fr").
+   So: 3 columns on desktop, 1 column on phones — no extra rules needed. */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin: 2rem 0;
+}
+.card {
+  position: relative;        /* lets .card-arrow be positioned relative to the card */
+  display: flex;
+  flex-direction: column;    /* children stacked vertically */
+  gap: 0.4rem;
+  padding: 1.5rem 1.5rem 2.75rem;   /* top, sides, bottom (room for the arrow) */
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--ink);
+  /* transition: animate these properties smoothly (0.2 s) when they change, e.g. on hover */
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card:hover {
+  text-decoration: none;
+  transform: translateY(-4px);      /* lift the card 4px */
+  border-color: var(--line);
+  box-shadow: 0 12px 28px rgba(25, 74, 106, 0.1);
+}
+/* Small capitals label at the top of each card */
+.card-kicker {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+/* Round lime arrow in the bottom-right corner of each card */
+.card-arrow {
+  position: absolute;        /* placed relative to the card (which is position: relative) */
+  right: 1.25rem;
+  bottom: 1rem;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;       /* centre the arrow character inside the circle */
+  border-radius: 50%;        /* 50% of the size = a circle */
+  background: var(--lime);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.note { font-size: 1.15rem; }
+.license { color: var(--ink-soft); font-size: 0.95rem; }
+
+/* Partners' logos image */
+.partners {
+  width: 100%;
+  max-width: 900px;
+  margin: 1.5rem auto 0;
+}
+
+
+/* --------------------------------------------------------------------------
+   6. FOOTER
+   -------------------------------------------------------------------------- */
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;                 /* allow wrapping onto 2 lines on small screens */
+  align-items: center;
+  justify-content: space-between;  /* text left, UdeM logo right */
+  gap: 1rem;
+  padding: 1.5rem clamp(16px, 4vw, 2rem);
+  background: var(--footer-bg);
+  border-top: 1px solid #dee2e6;
+  font-size: 0.9rem;
+  color: var(--footer-fg);
+}
+.site-footer p { margin: 0; }
+.site-footer img { height: 46px; width: auto; }
+
+
+/* --------------------------------------------------------------------------
+   7. RESPONSIVE AND ACCESSIBILITY RULES
+   --------------------------------------------------------------------------
+   @media rules apply only when a condition is true.
+   -------------------------------------------------------------------------- */
+
+/* On screens narrower than 860px (phones, small tablets), hide the menu links
+   except the last one (FR), so the bar doesn't overflow.
+   :not(:last-child) = every <li> except the last one. */
+@media (max-width: 860px) {
+  .main-nav li:not(:last-child) { display: none; }
+}
+
+/* If the visitor asked their system to reduce motion, stop the bobbing arrow.
+   (home.js also checks this setting and stops the moving dots.) */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-cue span { animation: none; }
+}
