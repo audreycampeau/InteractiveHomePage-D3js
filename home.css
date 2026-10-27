@@ -286,7 +286,7 @@ h1, h2, h3 { line-height: 1.12; color: var(--ink); font-weight: 700; }
 .section h2::after {
   content: "";
   display: block;
-  width: 56px;
+  width: 156px;
   height: 5px;
   margin-top: 0.7rem;
   border-radius: 3px;
